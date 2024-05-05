@@ -1,19 +1,22 @@
 import numpy as np  # type: ignore
 from scipy.stats import norm  # type: ignore
-import time 
+import time
 
 from SDE.utils.matrix import Matrix
 
 # keep following lines to import NormalBoxMuller
 import sys
-sys.path.append("../../") 
+
+sys.path.append("../../")
 from Generators.Continuous_Generators.Normal import NormalBoxMuller
+from Generators.Uniform_Generators.VanDerCorput import VanDerCorput
 
 ################################################################
 ##################### SIMULATION ENVIRONMENT ###################
 ################################################################
 
-def generate_n_gaussian(n,live_seed=False):
+
+def generate_n_gaussian(n, live_seed=False):
     """
     Simulates n values following Normal(0,1)
 
@@ -21,28 +24,33 @@ def generate_n_gaussian(n,live_seed=False):
     Returns: : Array of n random values following the Gaussian(0,1) distribution.
     """
 
-    seed1,seed2 = (203,222),(268,104)                       # ranking of Dauphine Msc finance
-    if live_seed : 
-        seed_incr = int(time.time()*1000%100)                # set seed to first 3 decimals of time
-        seed1 = (seed1[0]+seed_incr,seed1[1]+seed_incr) 
-        seed2 = (seed2[0]+seed_incr,seed2[1]+seed_incr) 
+    seed1, seed2 = (203, 222), (268, 104)  # ranking of Dauphine Msc finance
+    if live_seed:
+        seed_incr = int(
+            time.time() * 1000 % 100
+        )  # set seed to first 3 decimals of time
+        seed1 = (seed1[0] + seed_incr, seed1[1] + seed_incr)
+        seed2 = (seed2[0] + seed_incr, seed2[1] + seed_incr)
 
-    gaussian_values = NormalBoxMuller(0, 1,seed1,seed2).generate_sim(n)
-    #gaussian_values = np.random.randn(n)
+    gaussian_values = NormalBoxMuller(0, 1, seed1, seed2).generate_sim(n)
+    # gaussian_values = np.random.randn(n)
 
-    if n == 1: gaussian_values = gaussian_values[0]
+    if n == 1:
+        gaussian_values = gaussian_values[0]
     return gaussian_values
 
 
 def build_gaussian_vector(correlation_matrix: Matrix, normal_vec):
     """
     Given a vector of N(0,1) and a correlation matrix, returns the correlated gaussian vector
-    
-    correlation_matrix (Matrix) : correlation matrix of assets 
+
+    correlation_matrix (Matrix) : correlation matrix of assets
     normal_vec (list): list of normal values N(0,1) with len(normal_vec)==nb assets
     """
 
-    assert len(normal_vec) == correlation_matrix.get_shape()[0], f"give normal simulations with size = number of assets {len(normal_vec)}vs{correlation_matrix.get_shape()[0]}"
+    assert (
+        len(normal_vec) == correlation_matrix.get_shape()[0]
+    ), f"give normal simulations with size = number of assets {len(normal_vec)}vs{correlation_matrix.get_shape()[0]}"
 
     if correlation_matrix.is_invertible():
         matrix_decomposition = correlation_matrix.cholesky_decomposition()
@@ -51,6 +59,32 @@ def build_gaussian_vector(correlation_matrix: Matrix, normal_vec):
 
     multivariate_gaussian_values = np.dot(matrix_decomposition, normal_vec)
     return multivariate_gaussian_values
+
+
+def generate_n_quasi_gaussian_2(n, live_seed=False):
+    """
+    Simulates n values following Normal(0,1) using quasi-random numbers
+
+    n (int): number of simulations
+    Returns: : Array of n random values following the Gaussian(0,1) distribution.
+    """
+
+    base = 13  # Lucky / Unlucky number
+    if live_seed:
+        base_incr = int(
+            time.time() * 1000 % 100
+        )  # set seed to first 3 decimals of time
+        base = base + base_incr
+        if not VanDerCorput.is_prime(base):
+            # find the next prime number
+            while not VanDerCorput.is_prime(base):
+                base += 1
+
+    quasi_gaussian_values = VanDerCorput(base).generate_sim(n)
+
+    if n == 1:
+        quasi_gaussian_values = quasi_gaussian_values[0]
+    return quasi_gaussian_values
 
 
 def is_prime(num):
@@ -126,7 +160,10 @@ def generate_n_gaussian_quasi(M, N):
     # Get the first M prime numbers
     prime_bases = get_first_n_primes(M)
     # Generate quasi-random sequences for each asset based on a unique prime base
-    sequences = [van_der_corput_custom_start(N, base=prime, start_value=0.1) for prime in prime_bases]
+    sequences = [
+        van_der_corput_custom_start(N, base=prime, start_value=0.1)
+        for prime in prime_bases
+    ]
     # Transform each sequence from uniform [0,1] to normal distribution
     normal_sequences = [norm.ppf(seq) for seq in sequences]
     # Stack all sequences to create an N x M matrix of quasi-random normals
@@ -138,7 +175,7 @@ def generate_n_gaussian_quasi(M, N):
 def generate_n_gaussian_quasi_paths(M, N, nb_periods):
     """
     Generate a structured output of quasi-random Gaussian values for M assets over N simulations and nb_periods time steps.
-    
+
     M: Number of assets
     N: Number of simulations
     nb_periods: Number of time steps
@@ -154,7 +191,9 @@ def generate_n_gaussian_quasi_paths(M, N, nb_periods):
         sequences_simulations = []
         for simulation in range(N):
             base = prime_bases[base_index]
-            sequence_simulation = van_der_corput_custom_start(nb_periods, base=base, start_value=0.5)
+            sequence_simulation = van_der_corput_custom_start(
+                nb_periods, base=base, start_value=0.5
+            )
             normal_sequence = [norm.ppf(seq) for seq in sequence_simulation]
             base_index += 1
             sequences_simulations.append(normal_sequence)
@@ -163,10 +202,13 @@ def generate_n_gaussian_quasi_paths(M, N, nb_periods):
     stacked_sequences = list(np.stack(sequences_assets, axis=-1))
     # Modify format
     for simulation in range(N):
-        all_paths.append([np.array(stacked_sequences[simulation][n_p]) for n_p in range(nb_periods)])
+        all_paths.append(
+            [np.array(stacked_sequences[simulation][n_p]) for n_p in range(nb_periods)]
+        )
     # Return results
     return all_paths
 
-if __name__ =="__main__":
+
+if __name__ == "__main__":
 
     print("Here comes the main")
