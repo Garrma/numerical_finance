@@ -1,17 +1,19 @@
 import numpy as np  # type: ignore
 from scipy.stats import norm  # type: ignore
+import time 
 
 from SDE.utils.matrix import Matrix
 
+# keep following lines to import NormalBoxMuller
 import sys
-sys.path.append("../../")
+sys.path.append("../../") 
 from Generators.Continuous_Generators.Normal import NormalBoxMuller
 
 ################################################################
 ##################### SIMULATION ENVIRONMENT ###################
 ################################################################
 
-def generate_n_gaussian(n):
+def generate_n_gaussian(n,live_seed=False):
     """
     Simulates n values following Normal(0,1)
 
@@ -19,7 +21,13 @@ def generate_n_gaussian(n):
     Returns: : Array of n random values following the Gaussian(0,1) distribution.
     """
 
-    gaussian_values = NormalBoxMuller(0, 1).generate_sim(n)
+    seed1,seed2 = (203,222),(268,104)
+    if live_seed : 
+        seed_incr = int(time.time()/100%100)
+        seed1 = (seed1[0]+seed_incr,seed1[1]+seed_incr) 
+        seed2 = (seed2[0]+seed_incr,seed2[1]+seed_incr) 
+
+    gaussian_values = NormalBoxMuller(0, 1,seed1,seed2).generate_sim(n)
     #gaussian_values = np.random.randn(n)
 
     if n == 1: gaussian_values = gaussian_values[0]

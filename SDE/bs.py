@@ -16,7 +16,7 @@ class BS_Asset(Asset1D):
     scheme : str = "euler"         # dynamic simulation type -> euler or milstein
     nb_brownians_per_sim = 1
 
-    def __init__(self, initial_spot, volatility, risk_free_rate,scheme = "euler"):
+    def __init__(self, initial_spot, volatility, risk_free_rate,live_seed = True,scheme = "euler"):
         """
         Initialize the Black-Scholes asset with given parameters.
 
@@ -30,7 +30,7 @@ class BS_Asset(Asset1D):
         
         self.scheme = scheme
 
-        super().__init__(initial_spot,volatility,risk_free_rate)
+        super().__init__(initial_spot,volatility,risk_free_rate,live_seed)
         
 
     def simulate_path_with_brownian(self, time_list,brownian_list):
@@ -61,7 +61,7 @@ class BS_Asset(Asset1D):
         if scheme == "milstein": spot_next_step = lambda spot,mu,vol,dt,w : spot + spot*(mu*dt + vol*np.sqrt(dt)*w ) + spot*0.5*(vol**2)*((np.sqrt(dt)*w)**2 - dt)
 
         for i in range(1, nb_periods):
-            asset_price_path[i] = spot_next_step(asset_price_path[i-1],rf,sigma,(time_list[i] - time_list[i-1]),brownian_list[i])
+            asset_price_path[i] = max(spot_next_step(asset_price_path[i-1],rf,sigma,(time_list[i] - time_list[i-1]),brownian_list[i]),0)
 
         return asset_price_path
     
@@ -127,6 +127,6 @@ class BS_AssetND(AssetND):
                 if self.assets[j].scheme == "euler" : spot_next_step = lambda spot,mu,vol,dt,w : spot + spot*(mu*dt + vol*np.sqrt(dt)*w )
                 if self.assets[j].scheme == "milstein": spot_next_step = lambda spot,mu,vol,dt,w : spot + spot*(mu*dt + vol*np.sqrt(dt)*w ) + spot*0.5*(vol**2)*((np.sqrt(dt)*w)**2 - dt)
 
-                asset_price_path[i][j] = spot_next_step(asset_price_path[i-1][j],self.assets[j].rf,self.assets[j].vol,(time_list[i] - time_list[i-1]),correlated_brownians[i][j])
+                asset_price_path[i][j] = max(spot_next_step(asset_price_path[i-1][j],self.assets[j].rf,self.assets[j].vol,(time_list[i] - time_list[i-1]),correlated_brownians[i][j]),0)
 
         return asset_price_path

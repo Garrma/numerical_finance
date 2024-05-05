@@ -16,7 +16,7 @@ class Basket(Underlying):
     aggregate_function : Callable[[np.array], float]    # function to determine perf of basket ex np.min, np.max, np.mean
     nb_brownians_per_sim : int = None                   # represent number of N(0,1) expected for simulation of one asset (use is 1 but could be more e.g in Heston =2)
 
-    def __init__(self,weights,assets:AssetND,aggregate_function:Callable[[np.array], float]):    
+    def __init__(self,weights,assets:AssetND,aggregate_function:Callable[[np.array], float],live_seed = True):    
         
         assert len(weights) == assets.dimension, "weights list is not corresponding to basket"
 
@@ -28,7 +28,7 @@ class Basket(Underlying):
         initial_spot = self.aggregate_function([w*a.initial_spot for w,a in zip(weights,self.assetND.assets)])
         dimension = len(self.weights)
 
-        super().__init__(initial_spot,dimension)
+        super().__init__(initial_spot,dimension,live_seed)
         
 
     ############### DYNAMIC ##############
@@ -128,28 +128,28 @@ class Basket(Underlying):
 
 class BS_Basket(Basket):
 
-    def __init__(self,weights,assets:List[Asset1D],correl_matrix,aggregate_function:Callable[[np.array], float]):    
+    def __init__(self,weights,assets:List[Asset1D],correl_matrix,aggregate_function:Callable[[np.array], float],live_seed = True):    
 
         assetND = BS_AssetND(assets,correl_matrix)
-        super().__init__(weights,assetND,aggregate_function)
+        super().__init__(weights,assetND,aggregate_function,live_seed)
 
 
 class Weighted_Basket(BS_Basket):
 
-    def __init__(self,weights,assets:AssetND,correl_matrix):    
+    def __init__(self,weights,assets:AssetND,correl_matrix,live_seed=True):    
         """
         define a basket object where the performance of the basket is computed as the weighted performance of the asset (regular basket)
         """
 
         aggregate_function = lambda x : np.sum(x)
-        super().__init__(weights,assets,correl_matrix,aggregate_function)
+        super().__init__(weights,assets,correl_matrix,aggregate_function,live_seed)
 
 class BO_Basket(BS_Basket):
 
-    def __init__(self,weights,assets:AssetND,correl_matrix):    
+    def __init__(self,weights,assets:AssetND,correl_matrix,live_seed=True): 
         """
         define a basket object where the performance of the basket is computed as the weighted performance of the asset (regular basket)
         """
 
         aggregate_function = lambda x : np.max(x)
-        super().__init__(weights,assets,correl_matrix,aggregate_function)
+        super().__init__(weights,assets,correl_matrix,aggregate_function,live_seed)

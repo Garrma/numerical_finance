@@ -4,7 +4,7 @@ from scipy.stats import norm
 
 
 from SDE.underlying import Underlying
-from SDE.basket import Basket
+from SDE.basket import Basket, Weighted_Basket
 import SDE.montecarlo as mc
 import SDE.utils.montecarlo_utils as mcu
 
@@ -235,7 +235,7 @@ class Option:
             brownian_vec, basket_object: Basket, T, actualised_payoff_function: Callable
         ) -> Callable:
 
-            return actualised_payoff_function(basket_object.log_simulate(T, brownian_vec))
+            return actualised_payoff_function(basket_object.log_simulate_with_brownian(T, brownian_vec))
 
         ######################## SETTING EXISTING METHOD #########################
         payoff_name = self._payoff_name
@@ -264,7 +264,7 @@ class Option:
 
         if payoff_name == "call":
             ########################## CONTROL VARIATE ##########################
-            if underlying_type == Basket:
+            if underlying_type == Weighted_Basket:
                 m_value = m_function(
                     underlying, self._actualisation_rate, self._strike, self._maturity
                 )

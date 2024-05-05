@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt  # type: ignore
 import numpy as np  # type: ignore
 from tqdm import tqdm  # type: ignore
 from sklearn.linear_model import LinearRegression  # type: ignore
-from typing import Callable
+from typing import Callable, List
 import time
 
 from SDE.utils.random_generation import generate_n_gaussian
@@ -21,6 +21,16 @@ def print_log_info(text, verbose=True, line_length=80, c="*"):
     nb_equal_upper_one_side = int((line_length - len(text)) / 2)
     text_to_print = f"{c * nb_equal_upper_one_side} {text} {c * nb_equal_upper_one_side}"
     print(text_to_print)
+
+def apply_transformation_recursive(iterable,A_transformation : Callable[[float],float]):
+    """
+    apply a function A to any value of iterable how any kind of shape
+    """
+    if isinstance(iterable, (list, tuple)):
+        return [apply_transformation_recursive(item, A_transformation) for item in iterable]
+    else:
+        return A_transformation(iterable)
+
     
 ################################################################
 ########### GENERAL WRITING OF ESTIMATORS FUNCTIONS ############
@@ -44,10 +54,7 @@ def antithetic_estimator_general(
     A_transformation (func): function such that A(x) is equal in law to x
     """
 
-    h_vector = [
-        0.5 * (h_function(simulation) + h_function(A_transformation(simulation)))
-        for simulation in simulations
-    ]
+    h_vector = [ 0.5 * (h_function(simulation) + h_function(apply_transformation_recursive(simulation,A_transformation)))  for simulation in simulations ]
     return np.mean(h_vector)
 
 
@@ -87,7 +94,7 @@ def control_estimator_general(
 
 
 def control_antithetic_estimator_general(
-    simulations,
+    simulations:List[List[float]],
     h_function: Callable,
     h0_function: Callable,
     m: float,
@@ -104,7 +111,7 @@ def control_antithetic_estimator_general(
     """
 
     # apply A shift to simulations
-    simulations_A = [A_transformation(simulation) for simulation in simulations]
+    simulations_A = apply_transformation_recursive(simulations,A_transformation)
 
     control_variate_estimator_value = control_estimator_general(
         simulations, h_function, h0_function, m
@@ -474,7 +481,7 @@ def compute_performance_estimators(
     NMin = 50  # we assume width of interval not meaningful under NMin simulations
 
     ### determine number of simulations required to enter CI
-    brownian_simu_vec = [generate_n_gaussian(nb_asset) for _ in range(NMin)]
+    brownian_simu_vec = [generate_n_gaussian(nb_asset,live_seed=True) for _ in range(NMin)]
 
     # make sur tolerance is meaningful
     estimations_vec = [
@@ -494,7 +501,7 @@ def compute_performance_estimators(
         while 2 * std > tol and cpt < NMax:
             cpt += 1
 
-            new_brownian = generate_n_gaussian(nb_asset)
+            new_brownian = generate_n_gaussian(nb_asset,live_seed=True)
             brownian_simu_vec.append(new_brownian)
 
             ### measure time required for above number of simulations

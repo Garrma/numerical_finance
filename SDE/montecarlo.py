@@ -10,7 +10,7 @@ from typing import Callable
 
 from SDE.underlying import Underlying
 from SDE.utils.matrix import Matrix
-from SDE.utils.montecarlo_utils import print_log_info
+from SDE.utils.montecarlo_utils import print_log_info,apply_transformation_recursive
 
 def display_single_boxplot(data, title):
     """
@@ -78,7 +78,7 @@ def mc_pricing(underlying: Underlying,
     if A_transformation:
         print_log_info("Antithetic method", verbose)
 
-        random_simulations_A_shift = [A_transformation(simulation) for simulation in random_simulations]
+        random_simulations_A_shift = apply_transformation_recursive(random_simulations,A_transformation)
         result_vec_A = [h_function(simulation_A) for simulation_A in random_simulations_A_shift]
         result_vec = [0.5 * (p + p_a) for p, p_a in zip(result_vec, result_vec_A)]
 
@@ -121,8 +121,7 @@ def mc_pricing(underlying: Underlying,
         almost_controle_var_vec = compute_almost_control_estimator(random_simulations, result_vec, m_value)
 
         if A_transformation:  # applying antithetic to control
-            almost_controle_var_vec_A = compute_almost_control_estimator(random_simulations_A_shift, result_vec_A,
-                                                                         m_value)
+            almost_controle_var_vec_A = compute_almost_control_estimator(random_simulations_A_shift, result_vec_A,m_value)
             almost_controle_var_vec = 0.5 * (almost_controle_var_vec + almost_controle_var_vec_A)
 
         ###### build control variate estimator 
@@ -363,7 +362,7 @@ def mcls_pricing(underlying: Underlying,
     if A_transformation:
         print_log_info("Antithetic method", verbose)
 
-        random_simulations_A_shift = [[A_transformation(value) for value in sublist] for sublist in random_simulations]
+        random_simulations_A_shift = apply_transformation_recursive(random_simulations,A_transformation)
         result_vec_A = LS_algorithm_applied_to_gaussians(random_simulations_A_shift)
 
         result_vec = [0.5 * (p + p_a) for p, p_a in zip(result_vec, result_vec_A)]
@@ -407,8 +406,7 @@ def mcls_pricing(underlying: Underlying,
         almost_controle_var_vec = compute_almost_control_estimator(random_simulations, result_vec, m_value)
 
         if A_transformation:  # applying antithetic to control
-            almost_controle_var_vec_A = compute_almost_control_estimator(random_simulations_A_shift, result_vec_A,
-                                                                         m_value)
+            almost_controle_var_vec_A = compute_almost_control_estimator(random_simulations_A_shift, result_vec_A,m_value)
             almost_controle_var_vec = 0.5 * (almost_controle_var_vec + almost_controle_var_vec_A)
 
         ###### build control variate estimator 

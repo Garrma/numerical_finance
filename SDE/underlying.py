@@ -6,8 +6,6 @@ from scipy.stats import norm                        # type: ignore
 from SDE.utils.matrix import Matrix
 from SDE.utils.random_generation import generate_n_gaussian, generate_n_gaussian_quasi_paths, generate_n_gaussian_quasi   # type: ignore
 
-my_normal_generation_function = generate_n_gaussian
-my_normal_generation_function_quasi = generate_n_gaussian_quasi_paths
 
 ################################################################
 ###################### DEFINE GENERIC CLASS ####################
@@ -15,12 +13,14 @@ my_normal_generation_function_quasi = generate_n_gaussian_quasi_paths
 
 class Underlying:
 
-    initial_spot : Union[List[float],float] # intial spot in 1 or d-dimension
-    dimension: int                          # 1 or d for if single or basket
+    initial_spot : Union[List[float],float]                 # intial spot in 1 or d-dimension
+    dimension: int                                          # 1 or d for if single or basket
+    generator_value_function : Callable[[int],List[float]]  # function allowing to simulate N(0,1) values dynamically or for a fixed seed
 
-    def __init__(self,initial_spot,dimension):
+    def __init__(self,initial_spot,dimension,live_seed = True):
         self.initial_spot = initial_spot
         self.dimension = dimension
+        self.generator_function = lambda x : generate_n_gaussian(x,live_seed=live_seed)
 
     def price(self,actualisation_rate:float, maturity:float, strike:float, option_type=str):
         """
@@ -30,9 +30,8 @@ class Underlying:
         """
         raise TypeError(f"No deterministic function possible for {self.__class__.__name__} underlying")
 
-    def simulate_path_with_brownian(self,time_vec):
+    def simulate_path(self,time_vec):
         """
-        this function will be define in subclasses
 
         Returns: one random value for an underlying at each time of the time_vec
         """
@@ -83,7 +82,7 @@ class Underlying:
                 return generate_n_gaussian_quasi_paths(dimension, nb_simulations,nb_periods)
             
             ######## CASE IF PSEUDO RANDOM #######
-            simulations_in_list = my_normal_generation_function(nb_simulations_required)
+            simulations_in_list = self.generator_function(nb_simulations_required)
 
             if dimension == 1 and nb_brownians_per_sim == 1 and nb_periods == 1:
                 # do nothing as already in list
@@ -92,8 +91,8 @@ class Underlying:
                 simulations = np.array(simulations_in_list).reshape(nb_simulations, nb_periods).tolist()
             elif dimension == 1 and nb_brownians_per_sim > 1:
                 simulations = np.array(simulations_in_list).reshape(nb_simulations,nb_brownians_per_sim, nb_periods).tolist()
-            #elif dimension > 1 and nb_brownians_per_sim == 1:
-
+            elif dimension >1 and nb_brownians_per_sim == 1 and nb_periods ==1:
+                simulations = np.array(simulations_in_list).reshape(nb_simulations,dimension).tolist()
             else : simulations = np.array(simulations_in_list).reshape(nb_simulations, nb_periods, dimension).tolist()
 
             # return simple list if only one simulation is asked
@@ -151,8 +150,8 @@ class Asset1D(Underlying):
     vol: float
     rf: float
 
-    def __init__(self, initial_spot,vol,rf):
-        super().__init__(initial_spot,dimension=1)
+    def __init__(self, initial_spot,vol,rf,live_seed = True):
+        super().__init__(initial_spot,dimension=1, live_seed=live_seed)
         
         self.vol = vol
         self.rf = rf
@@ -164,7 +163,7 @@ class AssetND(Underlying):
     correl_matrix : Matrix                          # correl_matrix matrix between assets 
     nb_brownians_per_sim : int = None               # represent number of N(0,1) expected for simulation of one asset (use is 1 but could be more e.g in Heston =2)
 
-    def __init__(self, assets: List[Asset1D], correl_matrix : Union[Matrix,Iterable]):
+    def __init__(self, assets: List[Asset1D], correl_matrix : Union[Matrix,Iterable],live_seed = False):
         
         # convert into matrix format
         if not isinstance(correl_matrix,Matrix):
@@ -184,7 +183,7 @@ class AssetND(Underlying):
         dimension = len(assets)
 
         initial_spot = [a.initial_spot for a in assets]
-        super().__init__(initial_spot,dimension)
+        super().__init__(initial_spot,dimension,live_seed)
 
         self.assets = deepcopy(assets)
         self.correl_matrix = deepcopy(correl_matrix)
