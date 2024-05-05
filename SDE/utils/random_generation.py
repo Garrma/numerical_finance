@@ -23,7 +23,7 @@ def generate_n_gaussian(n,live_seed=False):
 
     seed1,seed2 = (203,222),(268,104)
     if live_seed : 
-        seed_incr = int(time.time()/100%100)
+        seed_incr = int(time.time()*1000%100)                # set seed to first 3 decimals of time
         seed1 = (seed1[0]+seed_incr,seed1[1]+seed_incr) 
         seed2 = (seed2[0]+seed_incr,seed2[1]+seed_incr) 
 

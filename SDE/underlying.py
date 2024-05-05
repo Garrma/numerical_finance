@@ -54,7 +54,7 @@ class Underlying:
         # ADVANTAGES : no need to redefine the function for each subclass of underlying path
         # _NOTE : brownian is only used in the second index, first is useless 
 
-        return self.simulate_path_with_brownian([0,time])[-1]
+        return self.simulate_path([0,time])[-1]
     
     def generate_random_values_in_required_format(self,nb_periods,is_quasi_random:bool=False)->Callable[[int],float]:
         """
@@ -163,7 +163,7 @@ class AssetND(Underlying):
     correl_matrix : Matrix                          # correl_matrix matrix between assets 
     nb_brownians_per_sim : int = None               # represent number of N(0,1) expected for simulation of one asset (use is 1 but could be more e.g in Heston =2)
 
-    def __init__(self, assets: List[Asset1D], correl_matrix : Union[Matrix,Iterable],live_seed = False):
+    def __init__(self, assets: List[Asset1D], correl_matrix : Union[Matrix,Iterable],live_seed = True):
         
         # convert into matrix format
         if not isinstance(correl_matrix,Matrix):

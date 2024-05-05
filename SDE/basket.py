@@ -90,6 +90,13 @@ class Basket(Underlying):
         """
         return self.simulate_log_path_with_brownian([0,time],[w,w])[-1]
     
+    def log_simulate(self,time):
+        """
+
+        Returns: one random value for an underlying at each time of the time_vec
+        """
+        return self.log_simulate_with_brownian(time,self.generate_random_values_in_required_format(1)(1))
+    
     ############### PROD DYNAMIC ##############
 
     def simulate_prod_path_with_brownian(self,time_vec,brownian_list_vec)->List[float]:
@@ -136,7 +143,7 @@ class BS_Basket(Basket):
 
 class Weighted_Basket(BS_Basket):
 
-    def __init__(self,weights,assets:AssetND,correl_matrix,live_seed=True):    
+    def __init__(self,weights,assets:List[Asset1D],correl_matrix,live_seed=True):    
         """
         define a basket object where the performance of the basket is computed as the weighted performance of the asset (regular basket)
         """
