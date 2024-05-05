@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Callable
+from typing import List, Callable, Iterable
 from scipy.stats import norm
 
 
@@ -138,6 +138,7 @@ class Option:
             self._exercise_times = exercise_times
             if not maturity:
                 maturity = exercise_times[-1]
+                self._maturity = maturity
         else:
             assert maturity, "Maturity must be given if no exercise_times are provided"
             self._exercise_times = [0, maturity]
@@ -149,9 +150,7 @@ class Option:
             self._terminal_payoff_function = lambda x: max(strike - x, 0)
 
         if self._terminal_payoff_function:
-            self._actualised_payoff_function = lambda x: np.exp(
-                -actualisation_rate * maturity
-            ) * terminal_payoff_function(x)
+            self._actualised_payoff_function = lambda x: np.exp(-actualisation_rate * maturity) * self._terminal_payoff_function(x)
 
     ######### SETTERS ##########
     def set_pricing_configuration(self, pricing_config: PricingConfiguration):
@@ -183,39 +182,21 @@ class Option:
         """
 
         ######################## DEFINING GENERIC FUNCTIONS ######################
-        def m_function(basket_object: Basket, r, K, T):
+        def m_function(basket_object:Basket,r,K,T):
             """
             computing E[h0(X)] for given basket and values
             """
-            assert (
-                type(basket_object) == Basket
-            ), f"Type of underlying for such variance reduction method must be Basket, now is {type(basket_object)}"
+            assert isinstance(basket_object,Basket), f"Type of underlying for such variance reduction method must be Basket, now is {type(basket_object)}"
+            
+            covar_matrix = basket_object.assetND.correl_matrix.m
+            mu_star = np.array([alpha_i*a.vol*np.sqrt(T) for alpha_i,a in zip(basket_object.weights,basket_object.assetND.assets)])
+            sigma_star = np.sqrt(np.dot(np.dot(mu_star.T,covar_matrix),mu_star))
+            cst = np.exp(np.sum([alpha_i*(np.log(a.initial_spot)+(a.rf-a.vol**2/2)*T) for alpha_i,a in zip(basket_object.weights,basket_object.assetND.assets)]))   
 
-            covar_matrix = basket_object.correl_matrix.m
-            mu_star = np.array(
-                [
-                    alpha_i * a.vol * np.sqrt(T)
-                    for alpha_i, a in zip(basket_object.weights, basket_object.assets)
-                ]
-            )
-            sigma_star = np.sqrt(np.dot(np.dot(mu_star.T, covar_matrix), mu_star))
-            cst = np.exp(
-                np.sum(
-                    [
-                        alpha_i * (np.log(a.initial_spot) + (a.rf - a.vol**2 / 2) * T)
-                        for alpha_i, a in zip(
-                            basket_object.weights, basket_object.assets
-                        )
-                    ]
-                )
-            )
-
-            d1 = np.log(cst / K) / sigma_star + sigma_star
+            d1 = np.log(cst/K)/sigma_star + sigma_star
             d2 = d1 - sigma_star
 
-            m = (
-                cst * np.exp(0.5 * sigma_star**2) * norm.cdf(d1) - K * norm.cdf(d2)
-            ) * np.exp(-r * T)
+            m = (cst*np.exp(0.5*sigma_star**2)*norm.cdf(d1) - K*norm.cdf(d2))*np.exp(-r*T)
             return m
 
         """ ** ATTENTION ** : for controle var. , payoff_function must be ACTUALISED if applying """
@@ -316,6 +297,22 @@ class Option:
         )
 
     ##### PRICING FUNCTION ######
+    def set_pricing_reduction_techniques(self,
+                A : Callable[[float],float],
+                h0_function : Callable[[Iterable],float],
+                m_value : FloatingPointError):
+        """
+        set variance reduction methods for the pricing configuration on the option object
+
+        underlying (Underlying): needs the underlying to take its values to compute the technique
+        A_transformation (func): transformation used in antithetic technique. signature is A : float -> float
+        h0_function (func): h0_function used in control variate technique. must take as an input the required shape of gaussians and return value (see ex.)
+        m_value (float): value used in control technique s.t m = E[h0(X)]
+        """
+        self.pricing_configuration.set_pricing_reduction_techniques(
+            A_transformation=A, h0_function=h0_function, m_value=m_value
+        )
+
     def set_pricing_antithetic(self):
         """Turn on the antithetic reduction variance method when pricing"""
         self.pricing_configuration.set_antithetic(True)

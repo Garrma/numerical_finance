@@ -21,7 +21,7 @@ def generate_n_gaussian(n,live_seed=False):
     Returns: : Array of n random values following the Gaussian(0,1) distribution.
     """
 
-    seed1,seed2 = (203,222),(268,104)
+    seed1,seed2 = (203,222),(268,104)                       # ranking of Dauphine Msc finance
     if live_seed : 
         seed_incr = int(time.time()*1000%100)                # set seed to first 3 decimals of time
         seed1 = (seed1[0]+seed_incr,seed1[1]+seed_incr) 

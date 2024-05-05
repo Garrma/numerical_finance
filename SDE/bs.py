@@ -58,7 +58,7 @@ class BS_Asset(Asset1D):
 
         # deciding which scheme apply
         if scheme == "euler" : spot_next_step = lambda spot,mu,vol,dt,w : spot*np.exp((mu-vol**2/2)*dt + vol*np.sqrt(dt)*w ) #spot + spot*(mu*dt + vol*np.sqrt(dt)*w )
-        if scheme == "milstein": spot_next_step = lambda spot,mu,vol,dt,w : spot + spot*(mu*dt + vol*np.sqrt(dt)*w ) + spot*0.5*(vol**2)*((np.sqrt(dt)*w)**2 - dt)
+        if scheme == "milstein": spot_next_step = lambda spot,mu,vol,dt,w : spot*np.exp((mu-vol**2/2)*dt + vol*np.sqrt(dt)*w +0.5*(vol**2)*((np.sqrt(dt)*w)**2 - dt)) # spot + spot*(mu*dt + vol*np.sqrt(dt)*w ) + spot*0.5*(vol**2)*((np.sqrt(dt)*w)**2 - dt)
 
         for i in range(1, nb_periods):
             asset_price_path[i] = max(spot_next_step(asset_price_path[i-1],rf,sigma,(time_list[i] - time_list[i-1]),brownian_list[i]),0)

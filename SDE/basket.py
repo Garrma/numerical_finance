@@ -151,12 +151,3 @@ class Weighted_Basket(BS_Basket):
         aggregate_function = lambda x : np.sum(x)
         super().__init__(weights,assets,correl_matrix,aggregate_function,live_seed)
 
-class BO_Basket(BS_Basket):
-
-    def __init__(self,weights,assets:AssetND,correl_matrix,live_seed=True): 
-        """
-        define a basket object where the performance of the basket is computed as the weighted performance of the asset (regular basket)
-        """
-
-        aggregate_function = lambda x : np.max(x)
-        super().__init__(weights,assets,correl_matrix,aggregate_function,live_seed)
