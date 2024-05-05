@@ -35,7 +35,6 @@ def generate_n_gaussian(n, live_seed=False):
         seed2 = (seed2[0] + seed_incr, seed2[1] + seed_incr)
 
     gaussian_values = NormalBoxMuller(0, 1, seed1, seed2).generate_sim(n)
-    # gaussian_values = np.random.randn(n)
 
     if n == 1:
         gaussian_values = gaussian_values[0]
@@ -91,6 +90,7 @@ def generate_n_quasi_gaussian_2(n, live_seed=False):
     if n == 1:
         quasi_gaussian_values = quasi_gaussian_values[0]
     return quasi_gaussian_values
+
 
 def is_prime(num):
     """
