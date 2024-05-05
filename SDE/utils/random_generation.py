@@ -9,7 +9,9 @@ import sys
 
 sys.path.append("../../")
 from Generators.Continuous_Generators.Normal import NormalBoxMuller
+from Generators.Continuous_Generators.Normal import QuasiNormalBoxMuller
 from Generators.Uniform_Generators.VanDerCorput import VanDerCorput
+
 
 ################################################################
 ##################### SIMULATION ENVIRONMENT ###################
@@ -61,6 +63,7 @@ def build_gaussian_vector(correlation_matrix: Matrix, normal_vec):
     return multivariate_gaussian_values
 
 
+
 def generate_n_quasi_gaussian_2(n, live_seed=False):
     """
     Simulates n values following Normal(0,1) using quasi-random numbers
@@ -69,22 +72,25 @@ def generate_n_quasi_gaussian_2(n, live_seed=False):
     Returns: : Array of n random values following the Gaussian(0,1) distribution.
     """
 
-    base = 13  # Lucky / Unlucky number
+    base_1 = 13  # Lucky / Unlucky number
+    base_2 = 7 # Lucky / Unlucky number
     if live_seed:
         base_incr = int(
             time.time() * 1000 % 100
         )
-        base = base + base_incr
-        if not VanDerCorput.is_prime(base):
-            while not VanDerCorput.is_prime(base):
-                base += 1
+        base_1 = base_1 + base_incr
+        base_2 = base_2 + base_incr
 
-    quasi_gaussian_values = VanDerCorput(base).generate_sim(n)
-
+        #CHECK IF BASE_1 AND BASE_2 ARE PRIME
+        if not VanDerCorput.is_prime(base_1):
+            base_1 += 1
+        if not VanDerCorput.is_prime(base_2):
+            base_2 += 1
+        
+    quasi_gaussian_values = QuasiNormalBoxMuller(base_1, base_2).generate_sim(n)
     if n == 1:
         quasi_gaussian_values = quasi_gaussian_values[0]
     return quasi_gaussian_values
-
 
 def is_prime(num):
     """
