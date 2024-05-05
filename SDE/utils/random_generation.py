@@ -62,36 +62,6 @@ def build_gaussian_vector(correlation_matrix: Matrix, normal_vec):
     return multivariate_gaussian_values
 
 
-
-def generate_n_quasi_gaussian_2(n, live_seed=False):
-    """
-    Simulates n values following Normal(0,1) using quasi-random numbers
-
-    n (int): number of simulations
-    Returns: : Array of n random values following the Gaussian(0,1) distribution.
-    """
-
-    base_1 = 13  # Lucky / Unlucky number
-    base_2 = 7 # Lucky / Unlucky number
-    if live_seed:
-        base_incr = int(
-            time.time() * 1000 % 100
-        )
-        base_1 = base_1 + base_incr
-        base_2 = base_2 + base_incr
-
-        #CHECK IF BASE_1 AND BASE_2 ARE PRIME
-        if not VanDerCorput.is_prime(base_1):
-            base_1 += 1
-        if not VanDerCorput.is_prime(base_2):
-            base_2 += 1
-        
-    quasi_gaussian_values = QuasiNormalBoxMuller(base_1, base_2).generate_sim(n)
-    if n == 1:
-        quasi_gaussian_values = quasi_gaussian_values[0]
-    return quasi_gaussian_values
-
-
 def is_prime(num):
     """
     Check if a number is prime.
@@ -175,6 +145,32 @@ def generate_n_gaussian_quasi(M, N):
     stacked_sequences = list(np.stack(normal_sequences, axis=-1))
     # Return results
     return stacked_sequences
+
+
+def generate_n_quasi_gaussian_2(n, live_seed=False):
+    """
+    Simulates n values following Normal(0,1) using quasi-random numbers
+
+    n (int): number of simulations
+    Returns: : Array of n random values following the Gaussian(0,1) distribution.
+    """
+
+    base_1 = 13  # Lucky / Unlucky number
+    base_2 = 7  # Lucky / Unlucky number
+    if live_seed:
+        base_incr = int(time.time() * 1000 % 100)
+        base_1 = base_1 + base_incr
+        base_2 = base_2 + base_incr
+
+        if not VanDerCorput.is_prime(base_1):
+            base_1 += 1
+        if not VanDerCorput.is_prime(base_2):
+            base_2 += 1
+
+    quasi_gaussian_values = QuasiNormalBoxMuller(base_1, base_2).generate_sim(n)
+    if n == 1:
+        quasi_gaussian_values = quasi_gaussian_values[0]
+    return quasi_gaussian_values
 
 
 def generate_n_gaussian_quasi_paths(M, N, nb_periods):
