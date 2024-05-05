@@ -73,10 +73,9 @@ def generate_n_quasi_gaussian_2(n, live_seed=False):
     if live_seed:
         base_incr = int(
             time.time() * 1000 % 100
-        )  # set seed to first 3 decimals of time
+        )
         base = base + base_incr
         if not VanDerCorput.is_prime(base):
-            # find the next prime number
             while not VanDerCorput.is_prime(base):
                 base += 1
 
