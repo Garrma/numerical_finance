@@ -298,9 +298,9 @@ class Option:
 
     ##### PRICING FUNCTION ######
     def set_pricing_reduction_techniques(self,
-                A : Callable[[float],float],
-                h0_function : Callable[[Iterable],float],
-                m_value : FloatingPointError):
+                A : Callable[[float],float]=None,
+                h0_function : Callable[[Iterable],float]=None,
+                m_value : float =None):
         """
         set variance reduction methods for the pricing configuration on the option object
 
