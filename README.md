@@ -78,8 +78,6 @@ bermudan_call_option_object.set_pricing_configuration(pricing_config)
 print(f"MCLS Bermudan price is: {bermudan_call_option_object.Price(my_basket_object,display_info=True)} \n")
 ```
 
-<object data="docs/Numerical_Finance_Project.pdf" type="application/pdf" width="100%"> 
-</object>
 
 ## Contributors
 
