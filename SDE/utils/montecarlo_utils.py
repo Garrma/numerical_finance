@@ -24,7 +24,7 @@ def print_log_info(text, verbose=True, line_length=80, c="*"):
 
 def apply_transformation_recursive(iterable,A_transformation : Callable[[float],float]):
     """
-    apply a function A to any value of iterable how any kind of shape
+    apply a function A to any value of an iterable for any kind of shape
     """
     if isinstance(iterable, (list, tuple)):
         return [apply_transformation_recursive(item, A_transformation) for item in iterable]
@@ -75,10 +75,7 @@ def control_estimator_general(
         computes b* the value of coefficient b that minimize the variance BIASED VERSION
         """
         h_bar = np.mean([h_function(simulation) for simulation in normal_sim])
-        up_vec = [
-            (h0_function(simulation) - m) * (h_function(simulation) - h_bar)
-            for simulation in normal_sim
-        ]
+        up_vec = [ (h0_function(simulation) - m) * (h_function(simulation) - h_bar) for simulation in normal_sim]
         bottom_vec = [(h0_function(simulation) - m) ** 2 for simulation in normal_sim]
         b_star = np.sum(up_vec) / np.sum(bottom_vec)
         return b_star
@@ -86,10 +83,7 @@ def control_estimator_general(
     b_star = b(simulations)
 
     ######
-    h_vector = [
-        h_function(simulation) - b_star * (h0_function(simulation) - m)
-        for simulation in simulations
-    ]
+    h_vector = [ h_function(simulation) - b_star * (h0_function(simulation) - m)  for simulation in simulations ]
     return np.mean(h_vector)
 
 
@@ -110,19 +104,16 @@ def control_antithetic_estimator_general(
     Return : mean between control var. estimator and control var. applied to A transformation
     """
 
+    # can be reduced in one line only -> to test 
+    #return antithetic_estimator_general(simulations,lambda x : control_estimator_general(x,h_function,h0_function,m))
+
     # apply A shift to simulations
     simulations_A = apply_transformation_recursive(simulations,A_transformation)
 
-    control_variate_estimator_value = control_estimator_general(
-        simulations, h_function, h0_function, m
-    )
-    control_variate_estimator_value_antithetic = control_estimator_general(
-        simulations_A, h_function, h0_function, m
-    )
+    control_variate_estimator_value = control_estimator_general( simulations, h_function, h0_function, m)
+    control_variate_estimator_value_antithetic = control_estimator_general(  simulations_A, h_function, h0_function, m)
 
-    return 0.5 * (
-        control_variate_estimator_value + control_variate_estimator_value_antithetic
-    )
+    return 0.5 * ( control_variate_estimator_value + control_variate_estimator_value_antithetic )
 
 
 ################################################################
