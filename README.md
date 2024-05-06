@@ -28,7 +28,7 @@ Some results for the pricing of a european call are presented below. Full result
 
 This project offers a quick python pricing tool which can be used for other purposes. Here is a small example of what you can do but feel free to dive into the classes to see everything what you can do.
 
-**instantiate your undelrying and option as below**
+**instantiate your underlying and options as below**
 ```python
 # Iniate single asset or basket
 risk_free_rate = 0.05
