@@ -1,4 +1,5 @@
-# <center> Pricing of European and Bermudan </center> <center> *applications to variance reduction methods*  </center>
+# <center> Pricing of European and Bermudan </center> 
+## <center> *applications to variance reduction methods*  </center>
 
 This repository is project made within the context of Msc 203 Numerical Finance course by CASTELLARNAU Romain, GARRIGA Maxime and SAULIS Lukas.
 
