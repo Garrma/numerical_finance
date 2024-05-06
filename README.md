@@ -6,19 +6,19 @@ This repository is project made within the context of Msc 203 Numerical Finance 
 This project constitutes a first approach to multiple stocks options pricing with a focus on european & bermuda basket calls. The work also includes a few Monte Carlo reduction variance methods with antithetic and control variate.
 
 The choice between C++ and python for the project was free. To stay within the framework class and challenge ourselves, we developped from sratch random number generators without using inbuilt python packages. Have a look at the folder 
-[here](https://github.com/Garrma/numerical_finance/blob/main/docs/Generators.pdf). This is not mandatory for option pricing but added much more challenge and effors to our work.
+[here](docs/Generators.pdf). This is not mandatory for option pricing but added much more challenge and effors to our work.
 
 ## Instructions
 
 The instructions for the project are available here ➡️
-[See instructions](https://github.com/Garrma/numerical_finance/blob/main/docs/Project%20Instruction.pdf)
+[See instructions](docs/Project%20Instruction.pdf)
 
 
 ## Results 
 
 The main element of such project is to get an introduction to variance reduction implementation.<br>
 Some results for the pricing of a european call are presented below. Full results are available here ➡️
-[See results](https://github.com/Garrma/numerical_finance/blob/main/docs/Numerical_Finance_Project.pdf)
+[See results](docs/Numerical_Finance_Project.pdf)
 
 <!-- image result -->
 ![Hello World](https://res.cloudinary.com/dq4xpsevx/image/upload/v1715023923/Github/Numerical%20Finance/convergence_quasi_techniques.png)
@@ -77,6 +77,9 @@ pricing_config = PricingConfiguration(nb_simulations=10000,pricing_model_name="M
 bermudan_call_option_object.set_pricing_configuration(pricing_config)
 print(f"MCLS Bermudan price is: {bermudan_call_option_object.Price(my_basket_object,display_info=True)} \n")
 ```
+
+<object data="docs/Numerical_Finance_Project.pdf" type="application/pdf" width="100%"> 
+</object>
 
 ## Contributors
 
