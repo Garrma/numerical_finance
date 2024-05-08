@@ -6,7 +6,7 @@ This repository is project made within the context of Msc 203 Numerical Finance 
 This project constitutes a first approach to multiple stocks options pricing with a focus on european & bermuda basket calls. The work also includes a few Monte Carlo reduction variance methods with antithetic and control variate.
 
 The choice between C++ and python for the project was free. To stay within the framework class and challenge ourselves, we developped from sratch random number generators without using inbuilt python packages. Have a look at the folder 
-[here](docs/Generators.pdf). This is not mandatory for option pricing but added much more challenge and effors to our work.
+[here](docs/Generators%Architecture.pdf). This is not mandatory for option pricing but added much more challenge and effors to our work.
 
 ## Instructions
 
