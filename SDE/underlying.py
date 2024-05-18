@@ -40,8 +40,9 @@ class Underlying:
         """
         raise TypeError(f"No deterministic function possible for {self.__class__.__name__} underlying")
 
-    def simulate_path(self, time_vec):
+    def simulate_path(self, time_vec: List[float]) -> List[float]:
         """
+        Function that returns a path of the underlying given a time vector.
 
         :return: one random value for an underlying at each time of the time_vec
         """
