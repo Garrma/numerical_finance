@@ -12,7 +12,7 @@ from SDE.bs import BS_AssetND
 class Basket(Underlying):
 
     weights : np.array                                  # weights for given baskets
-    assetND : AssetND                                   # used AssetND object to simulate dynamique
+    assetND : AssetND                                   # used AssetND object to simulate dynamic
     aggregate_function : Callable[[np.array], float]    # function to determine perf of basket ex np.min, np.max, np.mean
     nb_brownians_per_sim : int = None                   # represent number of N(0,1) expected for simulation of one asset (use is 1 but could be more e.g in Heston =2)
 
